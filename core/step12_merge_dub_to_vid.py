@@ -17,7 +17,7 @@ DUB_VIDEO = "output/output_dub.mp4"
 DUB_SUB_FILE = 'output/dub.srt'
 DUB_AUDIO = 'output/dub.mp3'
 
-TRANS_FONT_SIZE = 20
+TRANS_FONT_SIZE = 27
 TRANS_FONT_NAME = 'Arial'
 if platform.system() == 'Linux':
     TRANS_FONT_NAME = 'NotoSansCJK-Regular'
