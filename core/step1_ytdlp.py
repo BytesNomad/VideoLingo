@@ -23,6 +23,7 @@ def download_video_ytdlp(url, save_path='output', resolution='1080', cutoff_time
         'format': 'bestvideo+bestaudio/best' if resolution == 'best' else f'bestvideo[height<={resolution}]+bestaudio/best[height<={resolution}]',
         'outtmpl': f'{save_path}/%(title)s.%(ext)s',
         'noplaylist': True,
+        'cookiefile': 'www.youtube.com_cookies.txt',
         'writethumbnail': True,
         'postprocessors': [{
             'key': 'FFmpegThumbnailsConvertor',

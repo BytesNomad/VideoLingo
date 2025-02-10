@@ -20,10 +20,10 @@ json-repair
 ruamel.yaml
 InquirerPy
 autocorrect-py
-ctranslate2==4.4.0
+ctranslate2==4.4.0 #@ git+https://github.com/OpenNMT/CTranslate2/ this version didn't support MacOS Intel
 edge-tts
 
-demucs[dev] @ git+https://github.com/adefossez/demucs
+demucs[main] @ git+https://github.com/adefossez/demucs
 whisperx @ git+https://github.com/m-bain/whisperx.git@7307306a9d8dd0d261e588cc933322454f853853
 
 syllables

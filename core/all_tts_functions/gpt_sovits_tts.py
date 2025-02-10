@@ -146,13 +146,14 @@ def start_gpt_sovits_server():
   • 启动过程中出现 `404 not found` 警告是正常的，请耐心等待[/bold red]""")
     
     # Find and check config path
-    gpt_sovits_dir, config_path = find_and_check_config_path(load_key("gpt_sovits.character"))
-
-    # Change to the GPT-SoVITS-v2 directory
-    os.chdir(gpt_sovits_dir)
+    
 
     # Start the GPT-SoVITS server
     if sys.platform == "win32":
+        gpt_sovits_dir, config_path = find_and_check_config_path(load_key("gpt_sovits.character"))
+
+        # Change to the GPT-SoVITS-v2 directory
+        os.chdir(gpt_sovits_dir)
         cmd = [
             "runtime\\python.exe",
             "api_v2.py",
@@ -164,13 +165,13 @@ def start_gpt_sovits_server():
         process = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
     elif sys.platform == "darwin":  # macOS
         print("Please manually start the GPT-SoVITS server at http://127.0.0.1:9880, refer to api_v2.py.")
-        while True:
-            user_input = input("Have you started the server? (y/n): ").lower()
-            if user_input == 'y':
-                process = None
-                break
-            elif user_input == 'n':
-                raise Exception("Please start the server before continuing.")
+        #while True:
+            # user_input = input("Have you started the server? (y/n): ").lower()
+            # if user_input == 'y':
+            #     process = None
+            #     break
+            # elif user_input == 'n':
+            #     raise Exception("Please start the server before continuing.")                       
     else:
         raise OSError("Unsupported operating system. Only Windows and macOS are supported.")
 
