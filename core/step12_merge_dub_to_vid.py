@@ -47,6 +47,7 @@ def merge_video_audio():
 
     # Merge video and audio with translated subtitles
     dub_volume = load_key("dub_volume")
+    merge_background = load_key("merge_background_sound")
     video = cv2.VideoCapture(VIDEO_FILE)
     TARGET_WIDTH = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
     TARGET_HEIGHT = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -61,14 +62,28 @@ def merge_video_audio():
     )
     
     cmd = [
-        'ffmpeg', '-y', '-i', VIDEO_FILE, '-i', background_file, '-i', DUB_AUDIO,
-        '-filter_complex',
+        'ffmpeg', '-y', '-i', VIDEO_FILE
+    ]
+    
+    if merge_background:
+        cmd.extend(['-i', background_file])
+    
+    cmd.extend(['-i', DUB_AUDIO])
+    
+    filter_complex = [
         f'[0:v]scale={TARGET_WIDTH}:{TARGET_HEIGHT}:force_original_aspect_ratio=decrease,'
         f'pad={TARGET_WIDTH}:{TARGET_HEIGHT}:(ow-iw)/2:(oh-ih)/2,'
         f'{subtitle_filter}[v];'
-        f'[1:a]volume=1[a1];[2:a]volume={dub_volume}[a2];'
-        f'[a1][a2]amix=inputs=2:duration=first:dropout_transition=3[a]'
     ]
+    
+    filter_complex.extend([
+            f'[1:a]volume=1[a1];[2:a]volume={dub_volume}[a2];'
+            f'[a1][a2]amix=inputs=2:duration=first:dropout_transition=3[a]'
+        ])    
+    
+    filter_complex.extend([f'[2:a]volume={dub_volume}[a]'])
+    
+    cmd.extend(['-filter_complex', ''.join(filter_complex)])
 
     if check_gpu_available():
         rprint("[bold green]Using GPU acceleration...[/bold green]")

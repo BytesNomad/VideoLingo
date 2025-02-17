@@ -7,6 +7,7 @@ from openai import OpenAI
 import time
 from requests.exceptions import RequestException
 from core.config_utils import load_key
+from core.google_ai_client import ask_google_ai
 
 LOG_FOLDER = 'output/gpt_log'
 LOCK = Lock()
@@ -46,6 +47,16 @@ def check_ask_gpt_history(prompt, model, log_title):
 def ask_gpt(prompt, response_json=True, valid_def=None, log_title='default'):
     api_set = load_key("api")
     llm_support_json = load_key("llm_support_json")
+    
+    # Check if Google AI is enabled
+    if api_set.get("google_ai", {}).get("enabled", False):
+        try:
+            # Try to use Google AI API
+            print("Using Google AI API...")
+            return ask_google_ai(prompt, response_json, valid_def)
+        except Exception as e:
+            print(f"⚠️ Google AI API error, falling back to default LLM: {str(e)}")
+    
     with LOCK:
         history_response = check_ask_gpt_history(prompt, api_set["model"], log_title)
         if history_response:

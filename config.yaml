@@ -8,6 +8,13 @@ api:
   key: 'sk-hzmskbvifeuhqoeesjqxwjolquftoowofkemyvuqcaneiopz'
   base_url: 'https://api.siliconflow.cn'
   model: 'deepseek-ai/DeepSeek-V3'
+  # Google AI API settings
+  google_ai:
+    enabled: true
+    api_key: 'AIzaSyAQZijlfiXPyhuWHxirUaNG7cBHevTAydE'
+    project_id: '512059827932'
+    location: 'us-central1'  # Google AI API region
+    model: 'gemini-2.0-flash'  # Default model
 
 # Language settings, written into the prompt, can be described in natural language
 target_language: '简体中文'
@@ -43,19 +50,19 @@ subtitle:
 summary_length: 8000
 
 # *Number of LLM multi-threaded accesses, set to 1 if using local LLM
-max_workers: 4
+max_workers: 3
 # *Maximum number of words for the first rough cut, below 18 will cut too finely affecting translation, above 22 is too long and will make subsequent subtitle splitting difficult to align
 max_split_length: 20
 
 # *Whether to reflect the translation result in the original text
-reflect_translate: true
+reflect_translate: false
 
 # *Whether to pause after extracting professional terms and before translation, allowing users to manually adjust the terminology table output\log\terminology.json
 pause_before_translate: false
 
 ## ======================== Dubbing Settings ======================== ##
 # TTS selection [sf_fish_tts, openai_tts, gpt_sovits, azure_tts, fish_tts, edge_tts, custom_tts]
-tts_method: 'sf_fish_tts'
+tts_method: 'edge_tts'
 
 # SiliconFlow FishTTS
 sf_fish_tts:
@@ -67,12 +74,12 @@ sf_fish_tts:
   custom_name: ''
   voice_id: ''
   # preset, custom, dynamic
-  mode: "dynamic"
+  mode: "preset"
 
 # OpenAI TTS-1 API configuration, 302.ai API only
 openai_tts:
-  api_key: 'YOUR_302_API_KEY'
-  voice: 'alloy'
+  api_key: 'sk-0Qozda7hxbpVt6YWkHxeAx75XbLrm8YOa0pVVB1RbJizdglH'
+  voice: 'fable'
 
 # Azure configuration, 302.ai API only
 azure_tts:
@@ -89,7 +96,7 @@ fish_tts:
 
 # Edge TTS configuration
 edge_tts:
-  voice: 'zh-CN-XiaoxiaoNeural'
+  voice: 'zh-CN-YunJianNeural'
 
 # SoVITS configuration
 gpt_sovits:
@@ -99,8 +106,8 @@ gpt_sovits:
 # *Audio speed range
 speed_factor:
   min: 1
-  accept: 1.2 # Maximum acceptable speed
-  max: 1.4
+  accept: 1.1 # Maximum acceptable speed
+  max: 1.2
 
 # *Merge audio configuration
 min_subtitle_duration: 2.5 # Minimum subtitle duration, will be forcibly extended
@@ -110,10 +117,8 @@ tolerance: 1.5 # Allowed extension time to the next subtitle
 # Volume settings
 dub_volume: 1.5  # *Dubbed audio volume (1.5 = 150%, most original dubbing audio is relatively quiet)
 
-
-
-
-
+# *Whether to merge background sound from original video
+merge_background_sound: false  # Set to false if you want pure dubbing voice without background sound
 
 ## ======================== Additional settings 请勿修改======================== ##
 # Whisper model directory

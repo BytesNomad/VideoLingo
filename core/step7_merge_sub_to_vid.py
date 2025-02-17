@@ -34,7 +34,8 @@ TRANS_SRT = f"{OUTPUT_DIR}/trans.srt"
 def check_gpu_available():
     try:
         result = subprocess.run(['ffmpeg', '-encoders'], capture_output=True, text=True)
-        return 'h264_nvenc' in result.stdout
+        # 检查 VideoToolbox 和 NVENC 编码器
+        return 'h264_videotoolbox' in result.stdout or 'h264_nvenc' in result.stdout
     except:
         return False
 
@@ -81,10 +82,14 @@ def merge_subtitles_to_video():
 
     gpu_available = check_gpu_available()
     if gpu_available:
-        rprint("[bold green]NVIDIA GPU encoder detected, will use GPU acceleration.[/bold green]")
-        ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
+        if platform.system() == 'Darwin':  # macOS
+            rprint("[bold green]VideoToolbox hardware encoder detected, will use GPU acceleration.[/bold green]")
+            ffmpeg_cmd.extend(['-c:v', 'h264_videotoolbox'])
+        else:  # Linux/Windows with NVIDIA
+            rprint("[bold green]NVIDIA GPU encoder detected, will use GPU acceleration.[/bold green]")
+            ffmpeg_cmd.extend(['-c:v', 'h264_nvenc'])
     else:
-        rprint("[bold yellow]No NVIDIA GPU encoder detected, will use CPU instead.[/bold yellow]")
+        rprint("[bold yellow]No hardware encoder detected, will use CPU instead.[/bold yellow]")
     
     ffmpeg_cmd.extend(['-y', OUTPUT_VIDEO])
 
