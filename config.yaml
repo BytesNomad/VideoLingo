@@ -11,9 +11,15 @@ api:
   # Google AI API settings
   google_ai:
     enabled: true
-    api_key: 'AIzaSyAQZijlfiXPyhuWHxirUaNG7cBHevTAydE'
-    project_id: '512059827932'
-    location: 'us-central1'  # Google AI API region
+    api_keys:
+    - 'AIzaSyCTLg_QpmuxIj8vov1a91EPv11zpO2q7zs'
+    - 'AIzaSyD3MXltuD48QFHr_5pGDVmPP-gTaHuhzZY'
+    - 'AIzaSyAObDCSDFOllcJRQqcyJ29iepYKAL6r0PU'
+    - 'AIzaSyD4HTIO3-zx9rRdVX_qc5nxedeEZbNQXmk'
+    - 'AIzaSyCSdTg2nKF07DISCLZEbHXdL05DkYqB8TI'
+    - 'AIzaSyD4VQGglkFibvJZS3YdyKpO9pZrJu7kMOo'
+    - 'AIzaSyB8XXLFzkXLtfCb-Dl9HkJLjl2P7f6ll8A'
+
     model: 'gemini-2.0-flash'  # Default model
 
 # Language settings, written into the prompt, can be described in natural language

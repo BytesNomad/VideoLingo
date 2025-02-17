@@ -20,7 +20,13 @@ class PreloadedSeparator(Separator):
     def __init__(self, model: BagOfModels, shifts: int = 1, overlap: float = 0.25,
                  split: bool = True, segment: Optional[int] = None, jobs: int = 0):
         self._model, self._audio_channels, self._samplerate = model, model.audio_channels, model.samplerate
-        device = "cuda" if is_cuda_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+        # 优化设备选择逻辑，优先使用CUDA，其次是MPS，最后是CPU
+        if is_cuda_available():
+            device = "cuda"
+        elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+            device = "mps"
+        else:
+            device = "cpu"
         self.update_parameter(device=device, shifts=shifts, overlap=overlap, split=split,
                             segment=segment, jobs=jobs, progress=True, callback=None, callback_arg=None)
 
