@@ -45,14 +45,17 @@ def transcribe():
         demucs_main()
     
     # step2 Compress audio
-    choose_audio = enhance_vocals() if load_key("demucs") else RAW_AUDIO_FILE
-    whisper_audio = compress_audio(choose_audio, WHISPER_FILE)
+    choose_audio = VOCAL_AUDIO_FILE if load_key("demucs") else RAW_AUDIO_FILE
+    #whisper_audio = compress_audio(choose_audio, WHISPER_FILE)
+    whisper_audio = choose_audio
 
     # step3 Extract audio
     segments = split_audio(whisper_audio)
     
     # step4 Transcribe audio
     all_results = []
+    time_offset = 0
+    
     if load_key("whisper.runtime") == "local":
         from core.all_whisper_methods.whisperX_local import transcribe_audio as ts
         rprint("[cyan]🎤 Transcribing audio with local model...[/cyan]")
@@ -60,18 +63,50 @@ def transcribe():
         from core.all_whisper_methods.whisperX_302 import transcribe_audio_302 as ts
         rprint("[cyan]🎤 Transcribing audio with 302 API...[/cyan]")
 
-    for start, end in segments:
-        result = ts(whisper_audio, start, end)
-        all_results.append(result)
+    for i, (start, end) in enumerate(segments):
+        try:
+            rprint(f"[cyan]Processing segment {i+1}/{len(segments)}...[/cyan]")
+            result = ts(whisper_audio, start, end)
+            
+            # 添加时间偏移
+            for segment in result['segments']:
+                segment['start'] += time_offset
+                segment['end'] += time_offset
+                if 'words' in segment:
+                    for word in segment['words']:
+                        if 'start' in word:
+                            word['start'] += time_offset
+                        if 'end' in word:
+                            word['end'] += time_offset
+            
+            all_results.append(result)
+            time_offset = end  # 更新时间偏移
+            
+        except Exception as e:
+            rprint(f"[red]Error processing segment {i+1}: {str(e)}[/red]")
+            import traceback
+            print(traceback.format_exc())
+            raise e
+    
+    if not all_results:
+        raise Exception("No transcription results were generated!")
     
     # step5 Combine results
     combined_result = {'segments': []}
     for result in all_results:
-        combined_result['segments'].extend(result['segments'])
+        if result and 'segments' in result:
+            combined_result['segments'].extend(result['segments'])
+    
+    # 确保segments按时间排序
+    combined_result['segments'].sort(key=lambda x: x['start'])
     
     # step6 Process df
-    df = process_transcription(combined_result)
-    save_results(df)
+    try:
+        df = process_transcription(combined_result)
+        save_results(df)
+    except Exception as e:
+        rprint(f"[red]Error processing transcription results: {str(e)}[/red]")
+        raise
         
 if __name__ == "__main__":
     transcribe()

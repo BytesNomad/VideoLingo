@@ -65,7 +65,7 @@ def get_audio_duration(audio_file: str) -> float:
         duration = 0
     return duration
 
-def split_audio(audio_file: str, target_len: int = 30*60, win: int = 60) -> List[Tuple[float, float]]:
+def split_audio(audio_file: str, target_len: int = 10*60, win: int = 60) -> List[Tuple[float, float]]:
     # 30 min 16000 Hz 96kbps ~ 22MB < 25MB required by whisper
     print("[bold blue]🔪 Starting audio segmentation...[/]")
     

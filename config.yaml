@@ -19,6 +19,7 @@ api:
     - 'AIzaSyCSdTg2nKF07DISCLZEbHXdL05DkYqB8TI'
     - 'AIzaSyD4VQGglkFibvJZS3YdyKpO9pZrJu7kMOo'
     - 'AIzaSyB8XXLFzkXLtfCb-Dl9HkJLjl2P7f6ll8A'
+    - 'AIzaSyAQZijlfiXPyhuWHxirUaNG7cBHevTAydE'
 
     model: 'gemini-2.0-flash'  # Default model
 
@@ -26,7 +27,7 @@ api:
 target_language: '简体中文'
 
 # Whether to use Demucs for vocal separation before transcription
-demucs: true
+demucs: false
 
 whisper:
   # ["medium", "large-v3", "large-v3-turbo"]. Note: for zh model will force to use Belle/large-v3

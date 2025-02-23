@@ -32,7 +32,7 @@ def process_video(file, dubbing=False, is_retry=False):
     if dubbing:
         dubbing_steps = [
             ("🔊 Generating audio tasks", gen_audio_tasks),
-            ("🎵 Extracting reference audio", step9_extract_refer_audio.extract_refer_audio_main),
+            #("🎵 Extracting reference audio", step9_extract_refer_audio.extract_refer_audio_main),
             ("🗣️ Generating audio", step10_gen_audio.gen_audio),
             ("🔄 Merging full audio", step11_merge_full_audio.merge_full_audio),
             ("🎞️ Merging dubbing to video", step12_merge_dub_to_vid.merge_video_audio),

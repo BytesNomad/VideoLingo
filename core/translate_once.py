@@ -88,7 +88,22 @@ def translate_lines(lines, previous_content_prompt, after_cotent_prompt, things_
         raise ValueError(f'Origin ···{lines}···,\nbut got ···{translate_result}···')
 
     return translate_result, lines
+# ... existing imports ...
 
+def translate_filename(filename: str) -> str:
+    """翻译文件名"""
+    try:
+        # 移除文件扩展名和特殊字符
+        clean_name = "".join(c for c in filename if c.isalnum() or c in (' ', '-', '_'))
+        translated, _ = translate_lines(clean_name, None, None, None, None)
+        # 再次清理翻译后的文件名，确保合法
+        safe_name = "".join(c for c in translated if c.isalnum() or c in (' ', '-', '_'))
+        return safe_name.strip()
+    except Exception as e:
+        console.print(f"[yellow]⚠️ 文件名翻译失败: {str(e)}，使用原文件名[/yellow]")
+        return filename
+
+# ... rest of the code ...
 
 if __name__ == '__main__':
     # test e.g.

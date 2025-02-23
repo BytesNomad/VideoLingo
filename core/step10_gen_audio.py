@@ -35,7 +35,15 @@ def parse_df_srt_time(time_str: str) -> float:
 
 def adjust_audio_speed(input_file: str, output_file: str, speed_factor: float) -> None:
     """Adjust audio speed and handle edge cases"""
-    # If the speed factor is close to 1, directly copy the file
+    # 确保速度因子在有效范围内
+    if speed_factor <= 0:
+        rprint(f"[red]⚠️ Invalid speed factor: {speed_factor}, using minimum speed 1.0[/red]")
+        speed_factor = 1.0
+    elif speed_factor > 2.0:
+        rprint(f"[red]⚠️ Speed factor too high: {speed_factor}, capping at 2.0[/red]")
+        speed_factor = 2.0
+        
+    # 如果速度接近 1.0，直接复制文件
     if abs(speed_factor - 1.0) < 0.001:
         shutil.copy2(input_file, output_file)
         return
@@ -81,7 +89,12 @@ def process_row(row: pd.Series, tasks_df: pd.DataFrame) -> Tuple[int, float]:
 
 def generate_tts_audio(tasks_df: pd.DataFrame) -> pd.DataFrame:
     """Generate TTS audio sequentially and calculate actual duration"""
-    tasks_df['real_dur'] = 0
+    # 初始化 real_dur 列
+    if 'real_dur' not in tasks_df.columns:
+        tasks_df['real_dur'] = 0.0
+    else:
+        tasks_df['real_dur'] = tasks_df['real_dur'].astype(float)
+        
     rprint("[bold green]🎯 Starting TTS audio generation...[/bold green]")
     
     with Progress() as progress:
@@ -92,7 +105,8 @@ def generate_tts_audio(tasks_df: pd.DataFrame) -> pd.DataFrame:
         for _, row in tasks_df.head(warmup_size).iterrows():
             try:
                 number, real_dur = process_row(row, tasks_df)
-                tasks_df.loc[tasks_df['number'] == number, 'real_dur'] = real_dur
+                # 确保 real_dur 是浮点数
+                tasks_df.loc[tasks_df['number'] == number, 'real_dur'] = float(real_dur)
                 progress.advance(task)
             except Exception as e:
                 rprint(f"[red]❌ Error in warmup: {str(e)}[/red]")
@@ -131,6 +145,12 @@ def process_chunk(chunk_df: pd.DataFrame, accept: float, min_speed: float) -> tu
     keep_gaps = True
     speed_var_error = 0.1
 
+    # 添加安全检查
+    if durations <= speed_var_error or tol_durs <= speed_var_error:
+        rprint(f"[yellow]⚠️ Warning: Duration too small, using minimum speed[/yellow]")
+        return min_speed, False
+
+    # 修改速度因子计算逻辑
     if (chunk_durs + all_gaps) / accept < durations:
         speed_factor = max(min_speed, (chunk_durs + all_gaps) / (durations-speed_var_error))
     elif chunk_durs / accept < durations:
@@ -139,9 +159,9 @@ def process_chunk(chunk_df: pd.DataFrame, accept: float, min_speed: float) -> tu
     elif (chunk_durs + all_gaps) / accept < tol_durs:
         speed_factor = max(min_speed, (chunk_durs + all_gaps) / (tol_durs-speed_var_error))
     else:
-        speed_factor = chunk_durs / (tol_durs-speed_var_error)
+        speed_factor = max(min_speed, chunk_durs / (tol_durs-speed_var_error))
         keep_gaps = False
-        
+            
     return round(speed_factor, 3), keep_gaps
 
 def merge_chunks(tasks_df: pd.DataFrame) -> pd.DataFrame:
@@ -151,17 +171,32 @@ def merge_chunks(tasks_df: pd.DataFrame) -> pd.DataFrame:
     min_speed = load_key("speed_factor.min")
     chunk_start = 0
     
-    tasks_df['new_sub_times'] = None
+    # 创建 new_sub_times 列并初始化为空列表
+    tasks_df['new_sub_times'] = [[]] * len(tasks_df)
     
     for index, row in tasks_df.iterrows():
         if row['cut_off'] == 1:
             chunk_df = tasks_df.iloc[chunk_start:index+1].reset_index(drop=True)
             speed_factor, keep_gaps = process_chunk(chunk_df, accept, min_speed)
             
-            # 🎯 Step1: Start processing new timeline
-            chunk_start_time = parse_df_srt_time(chunk_df.iloc[0]['start_time'])
-            chunk_end_time = parse_df_srt_time(chunk_df.iloc[-1]['end_time']) + chunk_df.iloc[-1]['tolerance'] # 加上tolerance才是这一块的结束
+            # 修改时间计算逻辑
+            try:
+                chunk_start_time = parse_df_srt_time(chunk_df.iloc[0]['start_time'])
+                chunk_end_time = parse_df_srt_time(chunk_df.iloc[-1]['end_time'])
+                if pd.notna(chunk_df.iloc[-1]['tolerance']):
+                    chunk_end_time += float(chunk_df.iloc[-1]['tolerance'])
+            except Exception as e:
+                rprint(f"[red]Error parsing time for chunk {chunk_start} to {index}: {str(e)}[/red]")
+                continue
+                
+            # 添加时间范围检查
+            if chunk_end_time < chunk_start_time:
+                rprint(f"[yellow]Warning: Invalid time range for chunk {chunk_start} to {index}, skipping...[/yellow]")
+                chunk_start = index + 1
+                continue
+                
             cur_time = chunk_start_time
+            
             for i, row in chunk_df.iterrows():
                 # If i is not 0, which is not the first row of the chunk, cur_time needs to be added with the gap of the previous row, remember to divide by speed_factor
                 if i != 0 and keep_gaps:

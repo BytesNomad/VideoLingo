@@ -12,9 +12,6 @@ OUTPUT_LOG_DIR = "output/log"
 def transcribe_audio_302(audio_path: str, start: float = None, end: float = None):
     os.makedirs(OUTPUT_LOG_DIR, exist_ok=True)
     LOG_FILE = f"{OUTPUT_LOG_DIR}/whisperx302.json"
-    if os.path.exists(LOG_FILE):
-        with open(LOG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
         
     WHISPER_LANGUAGE = load_key("whisper.language")
     url = "https://api.302.ai/302/whisperx"
