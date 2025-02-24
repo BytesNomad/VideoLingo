@@ -67,20 +67,7 @@ def transcribe():
         try:
             rprint(f"[cyan]Processing segment {i+1}/{len(segments)}...[/cyan]")
             result = ts(whisper_audio, start, end)
-            
-            # 添加时间偏移
-            for segment in result['segments']:
-                segment['start'] += time_offset
-                segment['end'] += time_offset
-                if 'words' in segment:
-                    for word in segment['words']:
-                        if 'start' in word:
-                            word['start'] += time_offset
-                        if 'end' in word:
-                            word['end'] += time_offset
-            
             all_results.append(result)
-            time_offset = end  # 更新时间偏移
             
         except Exception as e:
             rprint(f"[red]Error processing segment {i+1}: {str(e)}[/red]")
