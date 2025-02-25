@@ -10,9 +10,15 @@ from core.config_utils import load_key
 # en-US-GuyNeural - Male  
 # en-GB-SoniaNeural - Female British
 # Common Chinese voices:
-# zh-CN-XiaoxiaoNeural - Female
-# zh-CN-YunxiNeural - Male
-# zh-CN-XiaoyiNeural - Female
+# zh-CN-YunjianNeural                Male      Sports, Novel          Passion
+# zh-CN-YunxiNeural                  Male      Novel                  Lively, Sunshine
+# zh-CN-YunxiaNeural                 Male      Cartoon, Novel         Cute
+# zh-CN-YunyangNeural                Male      News                   Professional, Reliable
+# zh-CN-liaoning-XiaobeiNeural       Female    Dialect                Humorous
+# zh-CN-shaanxi-XiaoniNeural         Female    Dialect                Bright
+# zh-CN-XiaoxiaoNeural               Female    News, Novel            Warm
+# zh-CN-XiaoyiNeural                 Female    Cartoon, Novel         Lively
+
 def edge_tts(text, save_path):
     # Load settings from config file
     edge_set = load_key("edge_tts")

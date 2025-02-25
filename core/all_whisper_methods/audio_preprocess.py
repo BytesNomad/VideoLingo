@@ -25,11 +25,11 @@ def compress_audio(input_file: str, output_file: str):
 def convert_video_to_audio(video_file: str):
     os.makedirs(AUDIO_DIR, exist_ok=True)
     if not os.path.exists(RAW_AUDIO_FILE):
-        print(f"🎬➡️🎵 Converting to high quality audio with FFmpeg ......")
+        print(f"🎬➡️🎵 Converting to audio with FFmpeg ......")
         subprocess.run([
             'ffmpeg', '-y', '-i', video_file, '-vn',
-            '-c:a', 'libmp3lame', '-b:a', '128k',
-            '-ar', '32000',
+            '-c:a', 'libmp3lame', '-b:a', '64k',  # 从 128k 降至 64k
+            '-ar', '16000',  # 从 32000 降至 16000 Hz
             '-ac', '1', 
             '-metadata', 'encoding=UTF-8', RAW_AUDIO_FILE
         ], check=True, stderr=subprocess.PIPE)
@@ -65,7 +65,7 @@ def get_audio_duration(audio_file: str) -> float:
         duration = 0
     return duration
 
-def split_audio(audio_file: str, target_len: int = 10*60, win: int = 60) -> List[Tuple[float, float]]:
+def split_audio(audio_file: str, target_len: int = 30*60, win: int = 60) -> List[Tuple[float, float]]:
     # 30 min 16000 Hz 96kbps ~ 22MB < 25MB required by whisper
     print("[bold blue]🔪 Starting audio segmentation...[/]")
     
