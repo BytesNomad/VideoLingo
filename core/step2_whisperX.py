@@ -3,6 +3,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from rich import print as rprint
 import subprocess
+import json  # 添加这行
 
 from core.config_utils import load_key
 from core.all_whisper_methods.demucs_vl import demucs_main, RAW_AUDIO_FILE, VOCAL_AUDIO_FILE
@@ -11,6 +12,7 @@ from core.step1_ytdlp import find_video_files
 
 WHISPER_FILE = "output/audio/for_whisper.mp3"
 ENHANCED_VOCAL_PATH = "output/audio/enhanced_vocals.mp3"
+COMBINED_WHISPER_RESULT = "output/log/combined_whisper_result.json"
 
 def enhance_vocals(vocals_ratio=2.50):
     """Enhance vocals audio volume"""
@@ -86,6 +88,12 @@ def transcribe():
     
     # 确保segments按时间排序
     combined_result['segments'].sort(key=lambda x: x['start'])
+    
+    # 保存合并后的结果
+    os.makedirs("output/log", exist_ok=True)
+    with open(COMBINED_WHISPER_RESULT, "w", encoding="utf-8") as f:
+        json.dump(combined_result, f, indent=4, ensure_ascii=False)
+    rprint(f"[green]✓ Combined result saved to {COMBINED_WHISPER_RESULT}[/green]")
     
     # step6 Process df
     try:

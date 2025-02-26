@@ -19,10 +19,33 @@ from core.config_utils import load_key
 # zh-CN-XiaoxiaoNeural               Female    News, Novel            Warm
 # zh-CN-XiaoyiNeural                 Female    Cartoon, Novel         Lively
 
-def edge_tts(text, save_path):
-    # Load settings from config file
+def select_voice(speaker_id):
+    """根据说话人信息选择合适的 Edge TTS 声音"""
     edge_set = load_key("edge_tts")
-    voice = edge_set.get("voice", "zh-CN-YunxiNeural")
+
+    # 检查是否有针对特定说话人的声音配置
+    speaker_voice_mapping = edge_set.get("speaker_voices", {})
+    if speaker_id and speaker_id in speaker_voice_mapping:
+        return speaker_voice_mapping[speaker_id]
+    
+    # 默认声音
+    default_voice = edge_set.get("default_voice", "zh-CN-YunjianNeural")
+    print(f"Speaker:{speaker_id} Using default voice: {default_voice}")
+    return default_voice
+
+
+
+def edge_tts(text, save_path, speaker=None):
+  
+    # Load settings from config file
+
+    # 选择合适的声音
+    try:
+        voice = select_voice(speaker)
+    except Exception as e:
+        print(f"Error selecting voice: {e}")
+        voice = "zh-CN-YunjianNeural"  # 回退到默认声音
+    print(f"Speaker:{speaker} Using voice: {voice}")
     
     # Create output directory if it doesn't exist
     speech_file_path = Path(save_path)
@@ -43,4 +66,4 @@ def edge_tts(text, save_path):
     print(f"Audio saved to {speech_file_path}")
 
 if __name__ == "__main__":
-    edge_tts("今天是个好天气", "edge_tts.wav")
+    edge_tts("今天是个好天气", "edge_tts.wav", "SPEAKER_01")

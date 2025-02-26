@@ -102,8 +102,21 @@ fish_tts:
     '丁真': '54a5170264694bfc8e9ad98df7bd89c3'
 
 # Edge TTS configuration
+# Common Chinese voices:
+# zh-CN-YunjianNeural                Male      Sports, Novel          Passion
+# zh-CN-YunxiNeural                  Male      Novel                  Lively, Sunshine
+# zh-CN-YunxiaNeural                 Male      Cartoon, Novel         Cute
+# zh-CN-YunyangNeural                Male      News                   Professional, Reliable
+# zh-CN-liaoning-XiaobeiNeural       Female    Dialect                Humorous
+# zh-CN-shaanxi-XiaoniNeural         Female    Dialect                Bright
+# zh-CN-XiaoxiaoNeural               Female    News, Novel            Warm
+# zh-CN-XiaoyiNeural                 Female    Cartoon, Novel         Lively
 edge_tts:
-  voice: 'zh-CN-YunJianNeural'
+  default_voice: "zh-CN-XiaoxiaoNeural"
+  speaker_voices:
+    "SPEAKER_00": "zh-CN-XiaoxiaoNeural"
+    "SPEAKER_01": "zh-CN-YunyangNeural"
+
 
 # SoVITS configuration
 gpt_sovits:
@@ -114,7 +127,7 @@ gpt_sovits:
 speed_factor:
   min: 1
   accept: 1.1 # Maximum acceptable speed
-  max: 1.2
+  max: 1.5
 
 # *Merge audio configuration
 min_subtitle_duration: 2.5 # Minimum subtitle duration, will be forcibly extended

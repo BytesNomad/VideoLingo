@@ -8,6 +8,7 @@ import datetime
 import re
 from core.all_tts_functions.estimate_duration import init_estimator, estimate_duration
 from rich import print as rprint
+import json
 
 INPUT_EXCEL = "output/audio/tts_tasks.xlsx"
 OUTPUT_EXCEL = "output/audio/tts_tasks.xlsx"
@@ -16,6 +17,8 @@ TRANS_SRT = "output/trans.srt"
 MAX_MERGE_COUNT = 5
 AUDIO_FILE = 'output/audio/raw.mp3'
 ESTIMATOR = None
+COMBINED_WHISPER_RESULT = "output/log/combined_whisper_result.json"
+
 
 def calc_if_too_fast(est_dur, tol_dur, duration, tolerance):
     accept = load_key("speed_factor.accept") # Maximum acceptable speed factor
@@ -133,10 +136,68 @@ def process_cutoffs(df):
             idx += merge_rows(df, idx, 1)
     
     return df
+def time_to_seconds(timestr):
+    # 分割字符串获取小时、分钟、秒和毫秒
+    hours, minutes, seconds = timestr.split(':')
+    seconds, milliseconds = seconds.split('.')
+    
+    # 将字符串转换为整数和浮点数
+    hours = int(hours)
+    minutes = int(minutes)
+    seconds = int(seconds)
+    milliseconds = int(milliseconds)
+    
+    # 计算总秒数
+    total_seconds = hours * 3600 + minutes * 60 + seconds + milliseconds / 1000
+    
+    return total_seconds
+
+def get_speaker_for_timerange(start_time, end_time, speakers_data):
+    """根据时间范围获取对应的说话人信息"""
+    start_seconds = time_to_seconds(start_time)
+    end_seconds = time_to_seconds(end_time)
+    
+    # 找出时间重叠最多的片段的说话人
+    max_overlap = 0
+    speaker_info = {
+        'speaker': None,
+    }
+    
+    for segment in speakers_data['segments']:
+        seg_start = segment['start']
+        seg_end = segment['end']
+        
+        # 计算重叠时间
+        overlap_start = max(start_seconds, seg_start)
+        overlap_end = min(end_seconds, seg_end)
+        overlap = max(0, overlap_end - overlap_start)
+        
+        if overlap > max_overlap:
+            max_overlap = overlap
+            speaker_info['speaker'] = segment.get('speaker', '')
+    
+    return speaker_info
 
 def gen_dub_chunks():
     rprint("[🎬 Starting] Generating dubbing chunks...")
     df = pd.read_excel(INPUT_EXCEL)
+    
+    # 读取 WhisperX 的输出结果
+    try:
+        with open(COMBINED_WHISPER_RESULT, 'r', encoding='utf-8') as f:
+            speakers_data = json.load(f)
+    except FileNotFoundError:
+        rprint("[⚠️ Warning] WhisperX log file not found. Speaker information will not be available.")
+        speakers_data = None
+    
+    # 添加 speaker 相关列
+    df['speaker'] = None
+    
+    if speakers_data:
+        for idx, row in df.iterrows():
+            speaker_info = get_speaker_for_timerange(row['start_time'], row['end_time'], speakers_data)
+            df.at[idx, 'speaker'] = speaker_info['speaker']
+         
     
     rprint("[📊 Processing] Analyzing timing and speed...")
     df = analyze_subtitle_timing_and_speed(df)

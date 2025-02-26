@@ -23,7 +23,7 @@ def clean_text_for_tts(text):
         text = text.replace(char, '')
     return text.strip()
 
-def tts_main(text, save_as, number, task_df):
+def tts_main(text, save_as, number, task_df, speaker=None):
     text = clean_text_for_tts(text)
     # Check if text is empty or single character, single character voiceovers are prone to bugs
     cleaned_text = re.sub(r'[^\w\s]', '', text).strip()
@@ -40,13 +40,15 @@ def tts_main(text, save_as, number, task_df):
     print(f"Generating <{text}...>")
     TTS_METHOD = load_key("tts_method")
     
+    # 获取说话人信息
+    
     max_retries = 3
     for attempt in range(max_retries):
         try:
             if attempt >= max_retries - 1:
                 print("Asking GPT to correct text...")
-                correct_text = ask_gpt(get_correct_text_prompt(text),log_title='tts_correct_text')
-                text = correct_text['text']
+                #correct_text = ask_gpt(get_correct_text_prompt(text),log_title='tts_correct_text')
+                #text = correct_text['text']
             if TTS_METHOD == 'openai_tts':
                 openai_tts(text, save_as)
             elif TTS_METHOD == 'gpt_sovits':
@@ -58,7 +60,7 @@ def tts_main(text, save_as, number, task_df):
             elif TTS_METHOD == 'sf_fish_tts':
                 siliconflow_fish_tts_for_videolingo(text, save_as, number, task_df)
             elif TTS_METHOD == 'edge_tts':
-                edge_tts(text, save_as)
+                edge_tts(text, save_as, speaker)  # 传递说话人信息
             elif TTS_METHOD == 'custom_tts':
                 custom_tts(text, save_as)
             

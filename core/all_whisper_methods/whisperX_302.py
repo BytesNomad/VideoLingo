@@ -27,13 +27,13 @@ def transcribe_audio_302(audio_path: str, start: float = None, end: float = None
         audio_path = temp_audio_path
     
     payload = {
-        "processing_type": "align",
-        "language": WHISPER_LANGUAGE,
-        "output": "raw"
+        "processing_type": "diarize",
+        "output": "raw",
+        
     }
     
     start_time = time.time()
-    rprint(f"[cyan]🎤 Transcribing audio with language:  <{WHISPER_LANGUAGE}> ...[/cyan]")
+    rprint(f"[cyan]🎤 Transcribing audio ...[/cyan]")
     files = [
         ('audio_input',(
             os.path.basename(audio_path),
